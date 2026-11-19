@@ -1,4 +1,4 @@
-% Exp 1
+% Exp 1: Generation of Continuous-Time and Discrete-Time Signals
 clc; clear; close all;
 t = -1:0.001:1;
 d = (t == 0);
@@ -87,7 +87,7 @@ x_d = sinc(n_sinc/2);
 subplot(2,1,2); stem(n_sinc, x_d); grid on;
 xlabel('Time'); ylabel('Amplitude'); title('Discrete sinc function');
 
-% Exp 2
+% Exp 2: Discrete-Time Signal Operations
 clc; clear; close all;
 n = -4:4;
 x1 = [0 1 2 3 4 5 6 7 8];
@@ -135,7 +135,7 @@ subplot(3,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
 subplot(3,1,2); stem(n, x1_delayed); xlabel('n'); ylabel('x1_delayed'); title('time delay');
 subplot(3,1,3); stem(n, x1_adv); xlabel('n'); ylabel('x1_adv'); title('time adv');
 
-% Exp 3
+% Exp 3: Linear Convolution and Cross-Correlation
 clc; clear; close all;
 x = [1 2 3 4];
 h = [6 7 8];
@@ -165,7 +165,7 @@ end
 disp('Cross-correlation result r[n] =');
 disp(r);
 
-% Exp 4
+% Exp 4: DFT and IDFT of a Sequence
 clc; clear; close all;
 x = [1 2 3 1];
 N = length(x);
@@ -193,7 +193,7 @@ subplot(3,1,1); stem(0:N-1, x, 'filled'); title('Input Signal x[n]'); xlabel('n'
 subplot(3,1,2); stem(0:N-1, abs(X), 'filled'); title('DFT X[k]'); xlabel('k'); ylabel('|X(k)|'); grid on;
 subplot(3,1,3); stem(0:N-1, angle(X), 'filled'); title('Angle of X'); xlabel('k'); ylabel('Angle'); grid on;
 
-% Exp 5
+% Exp 5: 8-Point DIT-FFT by Radix-2 Method
 clc; clear; close all;
 x = [1 4 3 2 0 0 0 0];
 w2 = 1;
@@ -236,7 +236,7 @@ X(8) = f1(4) - w8_3*f2(4);
 disp('The 8 point DFT of the given input sequence X(k):');
 disp(X);
 
-% Exp 6
+% Exp 6: Verification of the Convolution Theorem
 clc; clear; close all;
 x = [1 2 3 4];
 h = [1 1 1];
@@ -286,7 +286,7 @@ disp(time);
 disp('Frequency domain result (ifft):');
 disp(real(Y_fft));
 
-% Exp 7
+% Exp 7: FIR Filter Using Window Techniques
 clc; clear; close all;
 n = 20;
 wp = 0.5*pi;
@@ -311,7 +311,7 @@ xlabel('Normalised Frequency');
 ylabel('|H(w)|');
 legend('Hamming','boxcar','bartlett','blackman','hanning');
 
-% Exp 8
+% Exp 8: Fourth-Order Butterworth Low-Pass IIR Filter
 clc; clear; close all;
 Fs = 10000;
 Fc = 3000;
@@ -337,7 +337,7 @@ end
 subplot(2,1,1); legend('show', 'Location', 'northeast');
 subplot(2,1,2); legend('show', 'Location', 'northeast');
 
-% Exp 9
+% Exp 9: ECG Signal Generation
 clc; clear; close all;
 t = 0:0.005:1;
 p_wave = 0.2*sin(2*pi*5*(t-0.05)).*(t>=0.05 & t<=0.15);
@@ -353,7 +353,7 @@ figure('Position', [100, 100, 1200, 400]);
 plot(t_repeated, ecg_signal_repeated); grid on;
 xlabel('Time (s)'); ylabel('Amplitude'); title('ECG Signal');
 
-% Exp 10
+% Exp 10: Musical Audio Tone Generation
 clc; clear; close all;
 Fs = 8000;
 notes = [240 270 270 300 300 320 320 350];
