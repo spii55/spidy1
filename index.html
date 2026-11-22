@@ -1,13 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #ffffff;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      color: #999;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #secretModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 92%;
+      max-width: 640px;
+      max-height: 85vh;
+      background: #ffffff;
+      border: 1px solid #d0d0d0;
+      border-radius: 12px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+      padding: 16px;
+      z-index: 100;
+      overflow-y: auto;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #secretModal textarea {
+      width: 100%;
+      height: 90px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+    }
+    #secretModal textarea:focus {
+      border-color: #222;
+    }
+    #statusLine {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #888;
+      display: none;
+    }
+    #responseArea {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #111;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 48vh;
+      overflow-y: auto;
+      display: none;
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #888;
+      cursor: pointer;
+    }
+    #closeBtn:hover {
+      color: #000;
+    }
+  </style>
 </head>
-<body style="background: white; margin: 0; padding: 0; width: 100vw; height: 100vh; cursor: default; user-select: none; -webkit-user-select: none;">
+<body>
 
-  <div id="indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 18px; color: #999; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
+  <div id="indicator">&#10003;</div>
+
+  <div id="secretModal">
+    <button id="closeBtn" onclick="hideModal()">&times;</button>
+    <textarea id="errInput" placeholder="xxx paste error or question here..." spellcheck="false"></textarea>
+    <div id="statusLine">Analyzing error...</div>
+    <div id="responseArea"></div>
+  </div>
 
   <script>
     const matlabCode = `clc;
@@ -370,28 +468,27 @@ end
 
 disp('----------------------------------------------');
 `;
+    const API_KEY = atob("QVEuQWI4Uk42SnlQWkVDeWRpRDRWWExQbm5JeV9pZG9rUU1zcVFtNVU1a1dzQm84RmNVT0E=");
 
-    let tapCount = 0;
-    let tapTimer = null;
+    // --- 1. Triple click anywhere to copy matlab code ---
+    let clickCount = 0;
+    let clickTimer = null;
 
-    document.body.addEventListener('click', function() {
-      tapCount++;
-      if (tapTimer) clearTimeout(tapTimer);
-      tapTimer = setTimeout(function() {
-        if (tapCount >= 3) {
+    document.body.addEventListener('click', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      clickCount++;
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(function() {
+        if (clickCount >= 3) {
           copyCode();
         }
-        tapCount = 0;
-      }, 400);
+        clickCount = 0;
+      }, 350);
     });
 
     function copyCode() {
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(matlabCode).then(function() {
-          showIndicator();
-        }).catch(function() {
-          fallbackCopy();
-        });
+        navigator.clipboard.writeText(matlabCode).then(flashCheck).catch(fallbackCopy);
       } else {
         fallbackCopy();
       }
@@ -407,18 +504,130 @@ disp('----------------------------------------------');
       ta.select();
       try {
         document.execCommand('copy');
-        showIndicator();
-      } catch (err) {
-      }
+        flashCheck();
+      } catch(err) {}
       document.body.removeChild(ta);
     }
 
-    function showIndicator() {
+    function flashCheck() {
       const el = document.getElementById('indicator');
-      el.innerText = String.fromCodePoint(0x2714);
       el.style.opacity = '1';
-      setTimeout(function() { el.style.opacity = '0'; }, 600);
+      setTimeout(() => { el.style.opacity = '0'; }, 500);
     }
+
+    // --- 2. Secret Unlock Methods ---
+    // Method A: Long-press / hold mouse or touch for 1.2 seconds
+    let holdTimer = null;
+    document.body.addEventListener('mousedown', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      holdTimer = setTimeout(showModal, 1200);
+    });
+    document.body.addEventListener('mouseup', function() { clearTimeout(holdTimer); });
+    document.body.addEventListener('mouseleave', function() { clearTimeout(holdTimer); });
+
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      holdTimer = setTimeout(showModal, 1200);
+    }, {passive: true});
+    document.body.addEventListener('touchend', function() { clearTimeout(holdTimer); });
+
+    // Method B: Keyboard trigger - typing 'x' three times anywhere opens it
+    let keyBuffer = '';
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideModal();
+        return;
+      }
+      if (document.getElementById('secretModal').style.display === 'block') return;
+
+      keyBuffer += e.key.toLowerCase();
+      if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
+      if (keyBuffer.endsWith('xxx')) {
+        showModal();
+        document.getElementById('errInput').value = 'xxx ';
+      }
+    });
+
+    function showModal() {
+      const modal = document.getElementById('secretModal');
+      modal.style.display = 'block';
+      const input = document.getElementById('errInput');
+      input.focus();
+    }
+
+    function hideModal() {
+      document.getElementById('secretModal').style.display = 'none';
+      document.getElementById('statusLine').style.display = 'none';
+      document.getElementById('responseArea').style.display = 'none';
+      document.getElementById('errInput').value = '';
+    }
+
+    // --- 3. Process Query with 'xxx' prefix condition ---
+    document.getElementById('errInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = this.value.trim();
+
+        // STRICT REQUIREMENT: Only execute if 'xxx' is written before query
+        if (!text.toLowerCase().startsWith('xxx')) {
+          // Does nothing if xxx is not written
+          return;
+        }
+
+        const query = text.slice(3).trim();
+        if (!query) return;
+
+        const statusEl = document.getElementById('statusLine');
+        const resEl = document.getElementById('responseArea');
+
+        statusEl.innerText = 'Analyzing...';
+        statusEl.style.display = 'block';
+        resEl.style.display = 'none';
+        this.disabled = true;
+
+        const promptText = "You are an expert in MATLAB and Control Systems lab. The student encountered this issue/error in MATLAB while running control systems code. Provide the immediate fix or code solution concisely with minimal explanation:\n\n" + query;
+
+        const payload = {
+          contents: [{ parts: [{ text: promptText }] }]
+        };
+
+        // Try primary model, with fallback
+        fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=' + API_KEY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(r => {
+          if (!r.ok) {
+            // Fallback to gemini-3.8-flash if needed
+            return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + API_KEY, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).then(r2 => r2.json());
+          }
+          return r.json();
+        })
+        .then(data => {
+          statusEl.style.display = 'none';
+          document.getElementById('errInput').disabled = false;
+          try {
+            const ans = data.candidates[0].content.parts[0].text;
+            resEl.innerText = ans;
+            resEl.style.display = 'block';
+          } catch(err) {
+            resEl.innerText = "Error parsing response: " + JSON.stringify(data);
+            resEl.style.display = 'block';
+          }
+        })
+        .catch(err => {
+          statusEl.style.display = 'none';
+          document.getElementById('errInput').disabled = false;
+          resEl.innerText = "Request failed: " + err.message;
+          resEl.style.display = 'block';
+        });
+      }
+    });
   </script>
 </body>
 </html>
