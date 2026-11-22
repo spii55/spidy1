@@ -588,7 +588,7 @@ disp('----------------------------------------------');
       });
     }
 
-    // --- 3. Process Query with 'xxx' prefix condition ---
+    // --- 3. Process Query with 'xxx' prefix condition + FULL SCRIPT CONTEXT ---
     document.getElementById('errInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -610,8 +610,17 @@ disp('----------------------------------------------');
         copyBtn.style.display = 'none';
         this.disabled = true;
 
-        // Prompt specifically enforces ONLY pure executable MATLAB code
-        const promptText = "You are a MATLAB code generator. The user has an error or task in MATLAB. Output ONLY the raw executable MATLAB code to solve or fix it. Do NOT include markdown code blocks (do NOT use triple backticks), do NOT include explanations, do NOT include comments, headings, greetings, or text. Return ONLY pure runnable MATLAB code:\n\n" + query;
+        // Prompt includes full matlabCode context so AI knows the exact lab code
+        const promptText = "You are a MATLAB lab assistant for a student in Control Systems practical lab.\n" +
+          "Here is the student's complete script containing all experiments:\n\n" +
+          matlabCode + "\n\n" +
+          "The student encountered this error or needs this modification:\n" +
+          query + "\n\n" +
+          "Instructions:\n" +
+          "- Using the exact code context above, output ONLY the corrected executable MATLAB code snippet to fix the issue.\n" +
+          "- Do NOT include markdown code fences (no backticks).\n" +
+          "- Do NOT include explanations, greetings, comments, or text.\n" +
+          "- Output ONLY pure runnable MATLAB code ready to paste directly into MATLAB.";
 
         const payload = {
           contents: [{ parts: [{ text: promptText }] }]
@@ -638,9 +647,7 @@ disp('----------------------------------------------');
           try {
             let raw = data.candidates[0].content.parts[0].text;
             // Strip any markdown code blocks or backticks if returned
-            raw = raw.replace(/^```[a-zA-Z]*
-?/gm, '').replace(/```
-?$/gm, '').trim();
+            raw = raw.replace(/^```[a-zA-Z]*\n?/gm, '').replace(/```\n?$/gm, '').trim();
             generatedFixCode = raw;
 
             // Automatically copy to clipboard immediately!
