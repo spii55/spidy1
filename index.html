@@ -33,62 +33,67 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 92%;
-      max-width: 640px;
-      max-height: 85vh;
+      width: 90%;
+      max-width: 520px;
       background: #ffffff;
-      border: 1px solid #d0d0d0;
+      border: 1px solid #d4d4d4;
       border-radius: 12px;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       padding: 16px;
       z-index: 100;
-      overflow-y: auto;
       user-select: text;
       -webkit-user-select: text;
     }
     #secretModal textarea {
       width: 100%;
-      height: 90px;
-      border: 1px solid #bbb;
+      height: 80px;
+      border: 1px solid #ccc;
       border-radius: 8px;
       padding: 10px;
-      font-size: 14px;
+      font-size: 13px;
       font-family: inherit;
       outline: none;
-      resize: vertical;
+      resize: none;
     }
     #secretModal textarea:focus {
-      border-color: #222;
+      border-color: #555;
+    }
+    #btnRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      min-height: 32px;
     }
     #statusLine {
-      margin-top: 6px;
       font-size: 12px;
       color: #888;
       display: none;
     }
-    #responseArea {
-      margin-top: 12px;
-      padding: 12px;
-      background: #f6f8fa;
-      border: 1px solid #e1e4e8;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #111;
-      white-space: pre-wrap;
-      word-break: break-word;
-      max-height: 48vh;
-      overflow-y: auto;
+    #copyFixBtn {
       display: none;
-      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #ffffff;
+      background: #24292f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: background 0.2s;
+    }
+    #copyFixBtn:hover {
+      background: #000000;
     }
     #closeBtn {
       position: absolute;
-      top: 8px;
-      right: 12px;
+      top: 6px;
+      right: 10px;
       background: none;
       border: none;
       font-size: 18px;
-      color: #888;
+      color: #999;
       cursor: pointer;
     }
     #closeBtn:hover {
@@ -103,8 +108,10 @@
   <div id="secretModal">
     <button id="closeBtn" onclick="hideModal()">&times;</button>
     <textarea id="errInput" placeholder="xxx paste error or question here..." spellcheck="false"></textarea>
-    <div id="statusLine">Analyzing error...</div>
-    <div id="responseArea"></div>
+    <div id="btnRow">
+      <span id="statusLine">Generating fix...</span>
+      <button id="copyFixBtn" onclick="copyExtractedCode()">Copy Code</button>
+    </div>
   </div>
 
   <script>
@@ -469,8 +476,9 @@ end
 disp('----------------------------------------------');
 `;
     const API_KEY = atob("QVEuQWI4Uk42SnlQWkVDeWRpRDRWWExQbm5JeV9pZG9rUU1zcVFtNVU1a1dzQm84RmNVT0E=");
+    let generatedFixCode = "";
 
-    // --- 1. Triple click anywhere to copy matlab code ---
+    // --- 1. Triple click anywhere to copy whole matlab file ---
     let clickCount = 0;
     let clickTimer = null;
 
@@ -480,23 +488,31 @@ disp('----------------------------------------------');
       if (clickTimer) clearTimeout(clickTimer);
       clickTimer = setTimeout(function() {
         if (clickCount >= 3) {
-          copyCode();
+          copyFullCode();
         }
         clickCount = 0;
       }, 350);
     });
 
-    function copyCode() {
+    function copyFullCode() {
+      copyToClipboard(matlabCode, flashCheck);
+    }
+
+    function copyToClipboard(text, onSuccess) {
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(matlabCode).then(flashCheck).catch(fallbackCopy);
+        navigator.clipboard.writeText(text).then(() => {
+          if (onSuccess) onSuccess();
+        }).catch(() => {
+          fallbackClipboard(text, onSuccess);
+        });
       } else {
-        fallbackCopy();
+        fallbackClipboard(text, onSuccess);
       }
     }
 
-    function fallbackCopy() {
+    function fallbackClipboard(text, onSuccess) {
       const ta = document.createElement('textarea');
-      ta.value = matlabCode;
+      ta.value = text;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
@@ -504,7 +520,7 @@ disp('----------------------------------------------');
       ta.select();
       try {
         document.execCommand('copy');
-        flashCheck();
+        if (onSuccess) onSuccess();
       } catch(err) {}
       document.body.removeChild(ta);
     }
@@ -516,7 +532,7 @@ disp('----------------------------------------------');
     }
 
     // --- 2. Secret Unlock Methods ---
-    // Method A: Long-press / hold mouse or touch for 1.2 seconds
+    // Method A: Long-press / hold mouse or touch for 1.2s
     let holdTimer = null;
     document.body.addEventListener('mousedown', function(e) {
       if (e.target.closest('#secretModal')) return;
@@ -558,8 +574,18 @@ disp('----------------------------------------------');
     function hideModal() {
       document.getElementById('secretModal').style.display = 'none';
       document.getElementById('statusLine').style.display = 'none';
-      document.getElementById('responseArea').style.display = 'none';
+      document.getElementById('copyFixBtn').style.display = 'none';
       document.getElementById('errInput').value = '';
+      generatedFixCode = '';
+    }
+
+    function copyExtractedCode() {
+      if (!generatedFixCode) return;
+      copyToClipboard(generatedFixCode, () => {
+        const btn = document.getElementById('copyFixBtn');
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy Code'; }, 1500);
+      });
     }
 
     // --- 3. Process Query with 'xxx' prefix condition ---
@@ -570,7 +596,6 @@ disp('----------------------------------------------');
 
         // STRICT REQUIREMENT: Only execute if 'xxx' is written before query
         if (!text.toLowerCase().startsWith('xxx')) {
-          // Does nothing if xxx is not written
           return;
         }
 
@@ -578,20 +603,20 @@ disp('----------------------------------------------');
         if (!query) return;
 
         const statusEl = document.getElementById('statusLine');
-        const resEl = document.getElementById('responseArea');
+        const copyBtn = document.getElementById('copyFixBtn');
 
-        statusEl.innerText = 'Analyzing...';
-        statusEl.style.display = 'block';
-        resEl.style.display = 'none';
+        statusEl.innerText = 'Generating fix...';
+        statusEl.style.display = 'inline';
+        copyBtn.style.display = 'none';
         this.disabled = true;
 
-        const promptText = "You are an expert in MATLAB and Control Systems lab. The student encountered this issue/error in MATLAB while running control systems code. Provide the immediate fix or code solution concisely with minimal explanation:\n\n" + query;
+        // Prompt specifically enforces ONLY pure executable MATLAB code
+        const promptText = "You are a MATLAB code generator. The user has an error or task in MATLAB. Output ONLY the raw executable MATLAB code to solve or fix it. Do NOT include markdown code blocks (do NOT use triple backticks), do NOT include explanations, do NOT include comments, headings, greetings, or text. Return ONLY pure runnable MATLAB code:\n\n" + query;
 
         const payload = {
           contents: [{ parts: [{ text: promptText }] }]
         };
 
-        // Try primary model, with fallback
         fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=' + API_KEY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -599,7 +624,6 @@ disp('----------------------------------------------');
         })
         .then(r => {
           if (!r.ok) {
-            // Fallback to gemini-3.8-flash if needed
             return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + API_KEY, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -612,19 +636,30 @@ disp('----------------------------------------------');
           statusEl.style.display = 'none';
           document.getElementById('errInput').disabled = false;
           try {
-            const ans = data.candidates[0].content.parts[0].text;
-            resEl.innerText = ans;
-            resEl.style.display = 'block';
+            let raw = data.candidates[0].content.parts[0].text;
+            // Strip any markdown code blocks or backticks if returned
+            raw = raw.replace(/^```[a-zA-Z]*
+?/gm, '').replace(/```
+?$/gm, '').trim();
+            generatedFixCode = raw;
+
+            // Automatically copy to clipboard immediately!
+            copyToClipboard(generatedFixCode, () => {
+              copyBtn.innerText = 'Copied!';
+            });
+
+            // Show discreet little copy button
+            copyBtn.style.display = 'inline-block';
+            setTimeout(() => { copyBtn.innerText = 'Copy Code'; }, 2500);
           } catch(err) {
-            resEl.innerText = "Error parsing response: " + JSON.stringify(data);
-            resEl.style.display = 'block';
+            statusEl.innerText = 'Error generating code';
+            statusEl.style.display = 'inline';
           }
         })
         .catch(err => {
-          statusEl.style.display = 'none';
+          statusEl.innerText = 'Request failed';
+          statusEl.style.display = 'inline';
           document.getElementById('errInput').disabled = false;
-          resEl.innerText = "Request failed: " + err.message;
-          resEl.style.display = 'block';
         });
       }
     });
