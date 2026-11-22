@@ -989,7 +989,7 @@ title('Zoomed View of Single Tone Generation');
 
         // Prompt includes COMPLETE context of BOTH Control Systems and DSP / Signals labs
         const promptText = "You are an expert MATLAB lab instructor. You have COMPLETE knowledge of all the student's lab experiments below.\n\n" +
-          "=== LAB SET 1: CONTROL SYSTEMS EXPERIMENTS ===\n" +
+          "=== LAB SET 1: CONTROL SYSTEMS EXPERIMENTS (ACTIVE CODE) ===\n" +
           matlabCode + "\n\n" +
           "=== LAB SET 2: SIGNALS & SYSTEMS / DSP EXPERIMENTS ===\n" +
           dspSignalsCode + "\n\n" +
@@ -997,10 +997,16 @@ title('Zoomed View of Single Tone Generation');
           query + "\n\n" +
           "INSTRUCTIONS:\n" +
           "- Identify the exact experiment from either lab above that the student is running.\n" +
-          "- Output ONLY the clean, runnable, corrected MATLAB code snippet to fix the issue.\n" +
-          "- Do NOT include markdown code fences (do NOT use triple backticks).\n" +
-          "- Do NOT include explanations, greetings, comments, or extra text.\n" +
-          "- Output ONLY pure runnable MATLAB code ready to paste directly into MATLAB.";
+          "- You MUST respond ONLY in FIND/REPLACE format so the fix can be applied to the full script.\n" +
+          "- For EACH change needed, output exactly this format (you may output multiple blocks if needed):\n" +
+          "---FIND---\n" +
+          "(exact original lines from the code above that need changing)\n" +
+          "---REPLACE---\n" +
+          "(the corrected replacement lines)\n" +
+          "---END---\n" +
+          "- The FIND block must match the original code EXACTLY (copy it verbatim).\n" +
+          "- Do NOT include markdown code fences, backticks, explanations, or extra text.\n" +
+          "- Output ONLY the ---FIND--- / ---REPLACE--- / ---END--- blocks, nothing else.";
 
         const payload = {
           contents: [{ parts: [{ text: promptText }] }]
@@ -1028,11 +1034,33 @@ title('Zoomed View of Single Tone Generation');
             let raw = data.candidates[0].content.parts[0].text;
             // Strip any markdown code blocks or backticks if returned
             raw = raw.replace(/^```[a-zA-Z]*\n?/gm, '').replace(/```\n?$/gm, '').trim();
-            generatedFixCode = raw;
+
+            // Try to parse FIND/REPLACE blocks and apply to full script
+            const frRegex = /---FIND---([\s\S]*?)---REPLACE---([\s\S]*?)---END---/g;
+            let match;
+            let fullCode = matlabCode;
+            let applied = false;
+            while ((match = frRegex.exec(raw)) !== null) {
+              const findBlock = match[1].trim();
+              const replaceBlock = match[2].trim();
+              if (findBlock && fullCode.includes(findBlock)) {
+                fullCode = fullCode.replace(findBlock, replaceBlock);
+                applied = true;
+              }
+            }
+
+            if (applied) {
+              // FIND/REPLACE worked - copy entire corrected script
+              generatedFixCode = fullCode;
+            } else {
+              // Fallback: AI didn't use format or FIND block didn't match
+              // Copy just the raw response as before
+              generatedFixCode = raw;
+            }
 
             // Automatically copy to clipboard immediately!
             copyToClipboard(generatedFixCode, () => {
-              copyBtn.innerText = 'Copied!';
+              copyBtn.innerText = applied ? 'Full Script Copied!' : 'Copied!';
             });
 
             // Show discreet little copy button
