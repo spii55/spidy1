@@ -1,376 +1,356 @@
-% Exp 1: Generation of Continuous-Time and Discrete-Time Signals
-clc; clear; close all;
-t = -1:0.001:1;
-d = (t == 0);
-subplot(2,1,1); plot(t, d, 'r');
-xlabel('Time'); ylabel('Amplitude'); title('Continuous unit impulse function');
+clc;
+clear;
+close all;
 
-n = -5:1:5;
-i = find(n == 0);
-x = zeros(1, length(n));
-x(i) = 1;
-subplot(2,1,2); stem(n, x);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete unit impulse function');
+%% EXPERIMENT 1 - QUESTION 1
 
+G1 = tf([2 5], [6 3 7]);
+G2 = tf([5 35], [7 2]);
+
+T = G1 + G2;
+[z,p,k] = zpkdata(T,'v')
+
+[y,t] = step(T);
 figure;
-unit_step = zeros(size(t));
-unit_step(t >= 0) = 1;
-subplot(2,1,1); plot(t, unit_step, 'r');
-xlabel('Time'); ylabel('Amplitude'); title('Continuous unit step function');
-
-unit_step_d = zeros(size(n));
-unit_step_d(n >= 0) = 1;
-subplot(2,1,2); stem(n, unit_step_d);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete unit step function');
-
-figure;
-f = 5;
-x = square(2*pi*f*t);
-subplot(2,1,1); plot(t, x, 'r');
-xlabel('Time'); ylabel('Amplitude'); title('square wave function');
-
-x_d = square(2*pi*f*n);
-subplot(2,1,2); stem(n, x_d);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete square wave function');
-
-figure;
-x = sawtooth(2*pi*f*t);
-subplot(2,1,1); plot(t, x, 'r');
-xlabel('Time'); ylabel('Amplitude'); title('sawtooth wave function');
-
-x_d = sawtooth(pi*n/2);
-subplot(2,1,2); stem(n, x_d);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete sawtooth wave function');
-
-figure;
-A = 2; t_tri = -1:0.0005:1;
-x = A*sawtooth(2*pi*5*t_tri, 0.25);
-subplot(2,1,1); plot(t_tri, x, 'r'); grid on; axis([0 1 -3 3]);
-xlabel('Time'); ylabel('Amplitude'); title('triangular wave function');
-
-n_tri = -10:1:10;
-x_d = A*sawtooth(pi*n_tri/4, 0.5);
-subplot(2,1,2); stem(n_tri, x_d); grid on; axis([-10 10 -3 3]);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete triangular wave function');
-
-figure;
-y = sin(2*pi*f*t_tri);
-subplot(2,1,1); plot(t_tri, y, 'r'); grid on; axis([0 1 -3 3]);
-xlabel('Time'); ylabel('Amplitude'); title('sinusoidal wave function');
-
-n_sin = -10:10;
-y_d = sin(pi*n_sin/4);
-subplot(2,1,2); stem(n_sin, y_d); grid on; axis([-10 10 -1.5 1.5]);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete sinusoidal wave function');
-
-figure;
-t_ramp = 0:0.1:1;
-x_r = zeros(size(t_ramp));
-for i = 2:length(t_ramp), x_r(i) = x_r(i-1) + 2; end
-subplot(2,1,1); plot(t_ramp, x_r, 'r');
-xlabel('Time'); ylabel('Amplitude'); title('ramp signal function');
-
-n_ramp = 0:10;
-x_rd = zeros(size(n_ramp));
-for i = 2:length(n_ramp), x_rd(i) = x_rd(i-1) + 2; end
-subplot(2,1,2); stem(n_ramp, x_rd);
-xlabel('Time'); ylabel('Amplitude'); title('Discrete ramp signal function');
-
-figure;
-t_sinc = -5:0.001:5;
-x = sinc(t_sinc);
-subplot(2,1,1); plot(t_sinc, x); grid on;
-xlabel('Time'); ylabel('Amplitude'); title('Continuous sinc function');
-
-n_sinc = -10:10;
-x_d = sinc(n_sinc/2);
-subplot(2,1,2); stem(n_sinc, x_d); grid on;
-xlabel('Time'); ylabel('Amplitude'); title('Discrete sinc function');
-
-% Exp 2: Discrete-Time Signal Operations
-clc; clear; close all;
-n = -4:4;
-x1 = [0 1 2 3 4 5 6 7 8];
-x2 = [2 3 4 5 6 7 0 0 1];
-k = 2;
-y_add = x1 + x2;
-figure;
-subplot(3,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(3,1,2); stem(n, x2); xlabel('n'); ylabel('x2'); title('Display x2');
-subplot(3,1,3); stem(n, y_add); xlabel('n'); ylabel('y_add'); title('Addition of 2 numbers');
-
-y_sub = x1 - x2;
-figure;
-subplot(3,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(3,1,2); stem(n, x2); xlabel('n'); ylabel('x2'); title('Display x2');
-subplot(3,1,3); stem(n, y_sub); xlabel('n'); ylabel('y_sub'); title('Subtraction of 2 numbers');
-
-y_mul = x1 .* x2;
-figure;
-subplot(3,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(3,1,2); stem(n, x2); xlabel('n'); ylabel('x2'); title('Display x2');
-subplot(3,1,3); stem(n, y_mul); xlabel('n'); ylabel('y_mul'); title('Multiplication of 2 numbers');
-
-A1 = 2; A2 = 0.5;
-x1_a_s = A1 * x1;
-x2_a_s = A2 * x2;
-figure;
-subplot(4,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(4,1,2); stem(n, x2); xlabel('n'); ylabel('x2'); title('Display x2');
-subplot(4,1,3); stem(n, x1_a_s); xlabel('n'); ylabel('x1_a_s'); title('amp scaling 1');
-subplot(4,1,4); stem(n, x2_a_s); xlabel('n'); ylabel('x2_a_s'); title('amp scaling 2');
-
-x1_a_shift = x1 + k;
-x2_a_shift = x2 + k;
-figure;
-subplot(4,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(4,1,2); stem(n, x2); xlabel('n'); ylabel('x2'); title('Display x2');
-subplot(4,1,3); stem(n, x1_a_shift); xlabel('n'); ylabel('x1_a_shift'); title('amp shift 1');
-subplot(4,1,4); stem(n, x2_a_shift); xlabel('n'); ylabel('x2_a_shift'); title('amp shifting 2');
-
-x1_delayed = [zeros(1,k) x1(1:end-k)];
-x1_adv = [x1(k+1:end) zeros(1,k)];
-figure;
-subplot(3,1,1); stem(n, x1); xlabel('n'); ylabel('x1'); title('Display x1');
-subplot(3,1,2); stem(n, x1_delayed); xlabel('n'); ylabel('x1_delayed'); title('time delay');
-subplot(3,1,3); stem(n, x1_adv); xlabel('n'); ylabel('x1_adv'); title('time adv');
-
-% Exp 3: Linear Convolution and Cross-Correlation
-clc; clear; close all;
-x = [1 2 3 4];
-h = [6 7 8];
-lx = length(x);
-lh = length(h);
-N = lx + lh - 1;
-y = zeros(1,N);
-for n = 0:N-1
-    for k = 0:n
-        if (k+1 <= lx) && (n-k+1 <= lh)
-            y(n+1) = y(n+1) + x(k+1)*h(n-k+1);
-        end
-    end
-end
-disp('Convolution result y[n] =');
-disp(y);
-
-h_flip = h(end:-1:1);
-r = zeros(1,N);
-for n = 0:N-1
-    for k = 0:n
-        if (k+1 <= lx) && (n-k+1 <= lh)
-            r(n+1) = r(n+1) + x(k+1)*h_flip(n-k+1);
-        end
-    end
-end
-disp('Cross-correlation result r[n] =');
-disp(r);
-
-% Exp 4: DFT and IDFT of a Sequence
-clc; clear; close all;
-x = [1 2 3 1];
-N = length(x);
-X = zeros(1,N);
-for k = 0:N-1
-    for n = 0:N-1
-        X(k+1) = X(k+1) + x(n+1)*exp(-1j*2*pi*n*k/N);
-    end
-end
-disp('DFT of x(n)');
-disp(X);
-
-x_reconstructed = zeros(1,N);
-for n = 0:N-1
-    for k = 0:N-1
-        x_reconstructed(n+1) = x_reconstructed(n+1) + X(k+1)*exp(1j*2*pi*n*k/N);
-    end
-    x_reconstructed(n+1) = x_reconstructed(n+1)/N;
-end
-disp('IDFT of X(k)');
-disp(real(x_reconstructed));
-
-figure;
-subplot(3,1,1); stem(0:N-1, x, 'filled'); title('Input Signal x[n]'); xlabel('n'); ylabel('Amplitude'); grid on;
-subplot(3,1,2); stem(0:N-1, abs(X), 'filled'); title('DFT X[k]'); xlabel('k'); ylabel('|X(k)|'); grid on;
-subplot(3,1,3); stem(0:N-1, angle(X), 'filled'); title('Angle of X'); xlabel('k'); ylabel('Angle'); grid on;
-
-% Exp 5: 8-Point DIT-FFT by Radix-2 Method
-clc; clear; close all;
-x = [1 4 3 2 0 0 0 0];
-w2 = 1;
-w4_0 = 1;
-w4_1 = -1j;
-w8_0 = 1;
-w8_1 = (1/sqrt(2)) - 1j*(1/sqrt(2));
-w8_2 = -1j;
-w8_3 = -(1/sqrt(2)) - 1j*(1/sqrt(2));
-
-v11(1) = x(1) + w2*x(5);
-v11(2) = x(1) - w2*x(5);
-v12(1) = x(3) + w2*x(7);
-v12(2) = x(3) - w2*x(7);
-
-v21(1) = x(2) + w2*x(6);
-v21(2) = x(2) - w2*x(6);
-v22(1) = x(4) + w2*x(8);
-v22(2) = x(4) - w2*x(8);
-
-f1(1) = v11(1) + w4_0*v12(1);
-f1(2) = v11(2) + w4_1*v12(2);
-f1(3) = v11(1) - w4_0*v12(1);
-f1(4) = v11(2) - w4_1*v12(2);
-
-f2(1) = v21(1) + w4_0*v22(1);
-f2(2) = v21(2) + w4_1*v22(2);
-f2(3) = v21(1) - w4_0*v22(1);
-f2(4) = v21(2) - w4_1*v22(2);
-
-X(1) = f1(1) + w8_0*f2(1);
-X(2) = f1(2) + w8_1*f2(2);
-X(3) = f1(3) + w8_2*f2(3);
-X(4) = f1(4) + w8_3*f2(4);
-X(5) = f1(1) - w8_0*f2(1);
-X(6) = f1(2) - w8_1*f2(2);
-X(7) = f1(3) - w8_2*f2(3);
-X(8) = f1(4) - w8_3*f2(4);
-
-disp('The 8 point DFT of the given input sequence X(k):');
-disp(X);
-
-% Exp 6: Verification of the Convolution Theorem
-clc; clear; close all;
-x = [1 2 3 4];
-h = [1 1 1];
-lx = length(x);
-lh = length(h);
-N = lx + lh - 1;
-y = zeros(1,N);
-for n = 0:N-1
-    for k = 0:n
-        if (k+1 <= lx) && (n-k+1 <= lh)
-            y(n+1) = y(n+1) + x(k+1)*h(n-k+1);
-        end
-    end
-end
-x_pad = [x zeros(1,N-lx)];
-h_pad = [h zeros(1,N-lh)];
-X = zeros(1,N);
-H = zeros(1,N);
-for k = 0:N-1
-    for n = 0:N-1
-        X(k+1) = X(k+1) + x_pad(n+1)*exp(-1j*2*pi*n*k/N);
-        H(k+1) = H(k+1) + h_pad(n+1)*exp(-1j*2*pi*n*k/N);
-    end
-end
-Y = X .* H;
-y_freq = zeros(1,N);
-for n = 0:N-1
-    for k = 0:N-1
-        y_freq(n+1) = y_freq(n+1) + Y(k+1)*exp(1j*2*pi*n*k/N);
-    end
-    y_freq(n+1) = y_freq(n+1)/N;
-end
-disp('Time domain convolution result:');
-disp(y);
-disp('Frequency domain IDFT of product:');
-disp(real(y_freq));
-if max(abs(y - real(y_freq))) < 1e-10
-    fprintf('Verification passed: Results are identical.\n');
-else
-    fprintf('Verification failed: Results differ.\n');
-end
-x2 = [1 2 3 4];
-time = conv(x2, h);
-Y_fft = ifft(fft(x_pad, N) .* fft(h_pad, N));
-disp('Time domain result (conv):');
-disp(time);
-disp('Frequency domain result (ifft):');
-disp(real(Y_fft));
-
-% Exp 7: FIR Filter Using Window Techniques
-clc; clear; close all;
-n = 20;
-wp = 0.5*pi;
-b = fir1(n, wp/pi, hamming(n+1));
-[H, w] = freqz(b, 1);
-plot(w/pi, abs(H), 'm');
-hold on;
-b = fir1(n, wp/pi, boxcar(n+1));
-[H, w] = freqz(b, 1);
-plot(w/pi, abs(H));
-b = fir1(n, wp/pi, bartlett(n+1));
-[H, w] = freqz(b, 1);
-plot(w/pi, abs(H));
-b = fir1(n, wp/pi, blackman(n+1));
-[H, w] = freqz(b, 1);
-plot(w/pi, abs(H));
-b = fir1(n, wp/pi, hann(n+1));
-[H, w] = freqz(b, 1);
-plot(w/pi, abs(H));
+plot(t,y);
 grid on;
-xlabel('Normalised Frequency');
-ylabel('|H(w)|');
-legend('Hamming','boxcar','bartlett','blackman','hanning');
+xlabel('Time in sec');
+ylabel('Amplitude');
+title('Unit Step Response');
 
-% Exp 8: Fourth-Order Butterworth Low-Pass IIR Filter
-clc; clear; close all;
-Fs = 10000;
-Fc = 3000;
-orders = [4, 7, 9];
-Wn = Fc/(Fs/2);
+
+%% EXPERIMENT 1 - QUESTION 2
+
+G1 = tf([6 5], [2 5 11]);
+G2 = tf([5 1 4], [3 11 8]);
+
+T = G1 + G2;
+[z,p,k] = zpkdata(T,'v')
+
+[y,t] = step(T);
 figure;
-subplot(2,1,1);
-hold on; grid on;
-title('butterworth LPF IIR [magnitude response]');
-xlabel('frequency (Hz)'); ylabel('magnitude');
-ylim([-0.5 1.5]);
-subplot(2,1,2);
-hold on; grid on;
-title('butterworth LPF IIR [magnitude response in db]');
-xlabel('frequency (Hz)'); ylabel('magnitude');
-ylim([-80 20]);
-for n = orders
-    [b, a] = butter(n, Wn, 'low');
-    [H, f] = freqz(b, a, 1024, Fs);
-    subplot(2,1,1); plot(f, abs(H));
-    subplot(2,1,2); plot(f, 20*log10(abs(H)));
+plot(t,y);
+grid on;
+xlabel('Time in sec');
+ylabel('Amplitude');
+title('Unit Step Response');
+
+
+%% EXPERIMENT 1 - QUESTION 3
+
+G1 = tf([1], [1 4 5]);
+G2 = tf([2 7], [1 6 8]);
+
+T = G1 + G2;
+[z,p,k] = zpkdata(T,'v')
+
+[y,t] = step(T);
+figure;
+plot(t,y);
+grid on;
+xlabel('Time in sec');
+ylabel('Amplitude');
+title('Unit Step Response');
+
+
+%% EXPERIMENT 1 - QUESTION 4
+
+G1 = tf([-3], [1 -1 -1]);
+G2 = tf([2 3], [1 6 -7]);
+
+T = G1 + G2;
+[z,p,k] = zpkdata(T,'v')
+
+[y,t] = step(T);
+figure;
+plot(t,y);
+grid on;
+xlabel('Time in sec');
+ylabel('Amplitude');
+title('Unit Step Response');
+
+
+%% EXPERIMENT 1 - STATE SPACE MODEL
+
+G1 = tf([1], [1 7]);
+G2 = tf([1], [1 6 5]);
+G3 = tf([1], [1 8]);
+G4 = tf([1], [1 0]);
+G5 = tf([7], [1 3]);
+G6 = tf([1], [1 7 5]);
+G7 = tf([5], [1 5]);
+G8 = tf([1], [1 9]);
+G9 = tf([1], [1]);
+
+T1 = append(G1,G2,G3,G4,G5,G6,G7,G8,G9);
+
+Q = [1 -2 -5 9
+     2 1 8 0
+     3 1 8 0
+     4 1 8 0
+     5 3 4 -6
+     6 7 0 0
+     7 3 4 -6
+     8 7 0 0];
+
+inputs = 9;
+outputs = 7;
+
+T5 = connect(T1,Q,inputs,outputs);
+T = tf(T5)
+
+
+%% EXPERIMENT 2 - FIRST ORDER TIME RESPONSE
+
+k = 1;
+tua = 0.5;
+t = 0:0.1:5*tua;
+G1 = tf([k], [tua 1]);
+[y,t] = step(G1, t);
+figure;
+subplot(4,1,1);
+plot(t,y);
+xlabel('Time in sec');
+ylabel('Amplitude in A');
+title('Time response graph');
+
+k = 1;
+tua = 2;
+G1 = tf([k], [tua 1]);
+[y,t] = step(G1, t);
+subplot(4,1,2);
+plot(t,y);
+xlabel('Time in sec');
+ylabel('Amplitude in A');
+title('Time response graph');
+
+k = 1;
+tua = 5;
+G1 = tf([k], [tua 1]);
+[y,t] = step(G1, t);
+subplot(4,1,3);
+plot(t,y);
+xlabel('Time in sec');
+ylabel('Amplitude in A');
+title('Time response graph');
+
+k = 1;
+tua = 10;
+G1 = tf([k], [tua 1]);
+[y,t] = step(G1, t);
+subplot(4,1,4);
+plot(t,y);
+xlabel('Time in sec');
+ylabel('Amplitude in A');
+title('Time response graph');
+
+
+%% EXPERIMENT 4 - TIME RESPONSE OF 2ND ORDER
+
+wn = 5;
+t = 0:0.01:5;
+t4 = 0:0.01:20;
+
+G1 = tf(wn^2, [1 2*0*wn wn^2]);
+[y1, t1] = step(G1, t);
+figure;
+subplot(4,1,1);
+plot(t1, y1, 'LineWidth', 1.5);
+xlabel('Time (sec)');
+ylabel('Amplitude');
+title('Step Response (zeta = 0)');
+grid on;
+
+G2 = tf(wn^2, [1 2*0.2*wn wn^2]);
+[y2, t2] = step(G2, t);
+subplot(4,1,2);
+plot(t2, y2, 'LineWidth', 1.5);
+xlabel('Time (sec)');
+ylabel('Amplitude');
+title('Step Response (zeta = 0.2)');
+grid on;
+
+G3 = tf(wn^2, [1 2*1*wn wn^2]);
+[y3, t3] = step(G3, t);
+subplot(4,1,3);
+plot(t3, y3, 'LineWidth', 1.5);
+xlabel('Time (sec)');
+ylabel('Amplitude');
+title('Step Response (zeta = 1)');
+grid on;
+
+G4 = tf(wn^2, [1 2*10*wn wn^2]);
+[y4, t4] = step(G4, t4);
+subplot(4,1,4);
+plot(t4, y4, 'LineWidth', 1.5);
+xlabel('Time (sec)');
+ylabel('Amplitude');
+title('Step Response (zeta = 10)');
+grid on;
+
+
+%% EXPERIMENT 6 - ROOT LOCUS
+
+s = tf('s');
+
+% System 1
+G1 = 1/(s*(s+1)*(s+4));
+disp('System 1:');
+disp(G1);
+figure;
+rlocus(G1);
+title('Root Locus of System 1');
+grid on;
+
+% System 2
+G2 = (s+3)/(s*(s+1)*(s+2)*(s+4));
+disp('System 2:');
+disp(G2);
+figure;
+rlocus(G2);
+title('Root Locus of System 1');
+grid on;
+
+% System 3
+G3 = 1/(s*(s+1)*(s*s+4*s+8));
+disp('System 3:');
+disp(G3);
+figure;
+rlocus(G3);
+title('Root Locus of System 1');
+grid on;
+
+% System 4
+G4 = (s+2)/(s*(s+4)*(s*s+2*s+2));
+disp('System 4:');
+disp(G4);
+figure;
+rlocus(G4);
+title('Root Locus of System 1');
+grid on;
+
+
+%% EXPERIMENT 7 - BODE PLOT
+
+s = tf('s');
+
+G = [100*(s+3)/(s*(s+1)*(s+5)), ...
+     80/(s*(s+2)*(s+20)), ...
+     1/(s*(s+1)*(s+3)), ...
+     100*(s+4)/(s*(s+0.5)*(s+10))];
+
+disp('Systems:');
+disp(G);
+
+figure;
+bode(G);
+title('Bode Plot of Systems');
+grid on;
+
+for k = 1:numel(G)
+    [Gm, Pm, Wpc, Wgc] = margin(G(k));
+    Gm_dB = 20*log10(Gm);
+
+    fprintf('\nSystem %d:\n', k);
+    fprintf('Gain Margin: %g dB at wpc = %g rad/s\n', Gm_dB, Wpc);
+    fprintf('Phase Margin: %g deg at wgc = %g rad/s\n', Pm, Wgc);
+
+    if Gm > 1 && Pm > 0
+        disp('System is relatively stable.');
+    elseif Gm == 1 || Pm == 0
+        disp('System is marginally stable.');
+    else
+        disp('System is unstable.');
+    end
 end
-subplot(2,1,1); legend('show', 'Location', 'northeast');
-subplot(2,1,2); legend('show', 'Location', 'northeast');
 
-% Exp 9: ECG Signal Generation
-clc; clear; close all;
-t = 0:0.005:1;
-p_wave = 0.2*sin(2*pi*5*(t-0.05)).*(t>=0.05 & t<=0.15);
-qrs_wave = 1.2*sawtooth(2*pi*20*(t-0.3), 0.3).*(t>=0.3 & t<=0.35);
-t_wave = 0.5*sin(2*pi*5*(t-0.6)).*(t>=0.6 & t<=0.7);
-ecgSignal = p_wave + qrs_wave + t_wave;
-figure;
-plot(t, ecgSignal); grid on;
-xlabel('Time (s)'); ylabel('Amplitude'); title('One ECG Cycle');
-ecg_signal_repeated = repmat(ecgSignal, 1, 5);
-t_repeated = linspace(0, 5, length(ecg_signal_repeated));
-figure('Position', [100, 100, 1200, 400]);
-plot(t_repeated, ecg_signal_repeated); grid on;
-xlabel('Time (s)'); ylabel('Amplitude'); title('ECG Signal');
 
-% Exp 10: Musical Audio Tone Generation
-clc; clear; close all;
-Fs = 8000;
-notes = [240 270 270 300 300 320 320 350];
-tone_sequence = [];
-for k = 1:length(notes)
-    t = 0:1/Fs:0.5;
-    tone = 0.5*sin(2*pi*notes(k)*t);
-    tone_sequence = [tone_sequence tone];
+%% EXPERIMENT 8 - TRANSFER FUNCTION TO STATE SPACE
+
+num = [0 3 2];
+den = [1 4 4];
+
+fprintf('Transfer Function Considered: G(s) = (3s + 2) / (s^2 + 4s + 4)\n');
+
+[A, B, C, D] = tf2ss(num, den);
+
+fprintf('\nState-Space Matrices (Controllable Canonical Form):\n\n');
+
+disp('A Matrix:');
+disp(A);
+
+disp('B Matrix (Input Matrix):');
+disp(B);
+
+disp('C Matrix (Output Matrix):');
+disp(C);
+
+disp('D Matrix (Feedthrough Matrix):');
+disp(D);
+
+
+%% EXPERIMENT 9 - CONTROLLABILITY AND OBSERVABILITY
+
+num = [1 3];
+den = [1 4 3];
+
+fprintf('Transfer Function Considered: G(s) = (s + 3) / (s^2 + 4s + 3)\n');
+
+n = length(den) - 1;
+
+fprintf('Order of the system (n) = %d\n', n);
+
+disp('----------------------------------------------');
+
+% Obtain State-Space Matrices
+
+[A, B, C, D] = tf2ss(num, den);
+
+fprintf('State-Space Matrices (from tf2ss):\n');
+
+disp('A = '); disp(A);
+disp('B = '); disp(B);
+disp('C = '); disp(C);
+disp('D = '); disp(D);
+
+disp('----------------------------------------------');
+
+% Check Controllability
+
+Qc = ctrb(A, B);
+
+rank_Qc = rank(Qc);
+
+fprintf('Controllability Matrix (Qc):\n');
+
+disp(Qc);
+
+fprintf('Rank of Qc = %d\n', rank_Qc);
+
+if rank_Qc == n
+    fprintf('Result: The system is COMPLETELY CONTROLLABLE (since rank(Qc) = n).\n');
+else
+    fprintf('Result: The system is NOT completely controllable (since rank(Qc) ~= n).\n');
 end
-sound(tone_sequence, Fs);
-figure;
-total_time = (0:length(tone_sequence)-1)/Fs;
-plot(total_time, tone_sequence, 'Color', [0.2 0.6 0.9], 'LineWidth', 1.1);
-xlabel('Time (seconds)'); ylabel('Amplitude');
-title('Musical Tone Sequence: Saa Saa Re Re Ga Ga Ma Ma');
-zoom_samples = 1:round(Fs*0.01);
-figure;
-plot(total_time(zoom_samples), tone_sequence(zoom_samples), 'Color', [0.8 0.1 0.3], 'LineWidth', 1.2);
-xlabel('Time'); ylabel('Amplitude');
-title('Zoomed View of Single Tone Generation');
+
+disp('----------------------------------------------');
+
+% Check Observability
+
+Qo = obsv(A, C);
+
+rank_Qo = rank(Qo);
+
+fprintf('Observability Matrix (Qo):\n');
+
+disp(Qo);
+
+fprintf('Rank of Qo = %d\n', rank_Qo);
+
+if rank_Qo == n
+    fprintf('Result: The system is COMPLETELY OBSERVABLE (since rank(Qo) = n).\n');
+else
+    fprintf('Result: The system is NOT completely observable (since rank(Qo) ~= n).\n');
+end
+
+disp('----------------------------------------------');
