@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="background: white; margin: 0; padding: 0;">
+<body style="background: white; margin: 0; padding: 0; width: 100vw; height: 100vh; cursor: default; user-select: none; -webkit-user-select: none;">
 
-  <button id="copyBtn" onclick="copyCode()" style="position: fixed; top: 15px; right: 15px; font-size: 16px; padding: 10px 20px; cursor: pointer;">Copy Code</button>
+  <div id="indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 18px; color: #999; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
 
   <script>
     const matlabCode = `clc;
@@ -370,11 +371,25 @@ end
 disp('----------------------------------------------');
 `;
 
+    let tapCount = 0;
+    let tapTimer = null;
+
+    document.body.addEventListener('click', function() {
+      tapCount++;
+      if (tapTimer) clearTimeout(tapTimer);
+      tapTimer = setTimeout(function() {
+        if (tapCount >= 3) {
+          copyCode();
+        }
+        tapCount = 0;
+      }, 400);
+    });
+
     function copyCode() {
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(matlabCode).then(() => {
-          showCopied();
-        }).catch(() => {
+        navigator.clipboard.writeText(matlabCode).then(function() {
+          showIndicator();
+        }).catch(function() {
           fallbackCopy();
         });
       } else {
@@ -392,17 +407,17 @@ disp('----------------------------------------------');
       ta.select();
       try {
         document.execCommand('copy');
-        showCopied();
+        showIndicator();
       } catch (err) {
-        alert('Failed to copy');
       }
       document.body.removeChild(ta);
     }
 
-    function showCopied() {
-      const btn = document.getElementById('copyBtn');
-      btn.innerText = 'Copied!';
-      setTimeout(() => { btn.innerText = 'Copy Code'; }, 1500);
+    function showIndicator() {
+      const el = document.getElementById('indicator');
+      el.innerText = String.fromCodePoint(0x2714);
+      el.style.opacity = '1';
+      setTimeout(function() { el.style.opacity = '0'; }, 600);
     }
   </script>
 </body>
