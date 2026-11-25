@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Page not found &middot; GitHub Pages</title>
+  <title>404 Not Found</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,21 +39,13 @@
       color: rgba(0, 0, 0, 0.7);
       font-weight: 600;
     }
-    .suggestions {
-      margin-top: 35px;
-      color: #ccc;
-      font-size: 12px;
-    }
-    .suggestions span {
-      color: #666;
-      margin: 0 10px;
-    }
     #indicator {
       position: fixed;
-      bottom: 16px;
-      right: 16px;
-      font-size: 16px;
-      color: #999;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      color: #666;
       opacity: 0;
       transition: opacity 0.25s ease;
       pointer-events: none;
@@ -156,11 +148,8 @@
 
   <div class="container">
     <h1>404</h1>
-    <p><strong>There isn&#39;t a GitHub Pages site here.</strong></p>
-    <p>If you&#39;re trying to publish one, read the full documentation to learn how to set up <strong>GitHub Pages</strong> for your repository, organization, or user account.</p>
-    <div class="suggestions">
-      <span>GitHub Status</span> &mdash; <span>@githubstatus</span>
-    </div>
+    <p><strong>This page is currently offline.</strong></p>
+    <p>The requested resource could not be found or is temporarily unavailable.</p>
   </div>
 
   <div id="indicator">&#10003;</div>
@@ -726,6 +715,11 @@ title('Zoomed View of Single Tone Generation');
     // Method B: Keyboard trigger - typing 'x' three times anywhere opens it
     let keyBuffer = '';
     window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        copyFullCode();
+        return;
+      }
       if (e.key === 'Escape') {
         hideModal();
         return;
