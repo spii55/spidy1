@@ -2,25 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>Page not found &middot; GitHub Pages</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #ffffff;
+      background-color: #f1f1f1;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: rgba(0, 0, 0, 0.5);
       user-select: none;
       -webkit-user-select: none;
     }
+    .container {
+      margin: 60px auto 40px auto;
+      width: 600px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .container h1 {
+      font-size: 60px;
+      font-weight: 100;
+      margin: 0 0 25px 0;
+      color: rgba(0, 0, 0, 0.85);
+      letter-spacing: -1px;
+    }
+    .container p {
+      color: rgba(0, 0, 0, 0.5);
+      margin: 14px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .container p strong {
+      color: rgba(0, 0, 0, 0.7);
+      font-weight: 600;
+    }
+    .suggestions {
+      margin-top: 35px;
+      color: #ccc;
+      font-size: 12px;
+    }
+    .suggestions span {
+      color: #666;
+      margin: 0 10px;
+    }
     #indicator {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 26px;
+      bottom: 16px;
+      right: 16px;
+      font-size: 16px;
       color: #999;
       opacity: 0;
       transition: opacity 0.25s ease;
@@ -121,6 +153,15 @@
   </style>
 </head>
 <body>
+
+  <div class="container">
+    <h1>404</h1>
+    <p><strong>There isn&#39;t a GitHub Pages site here.</strong></p>
+    <p>If you&#39;re trying to publish one, read the full documentation to learn how to set up <strong>GitHub Pages</strong> for your repository, organization, or user account.</p>
+    <div class="suggestions">
+      <span>GitHub Status</span> &mdash; <span>@githubstatus</span>
+    </div>
+  </div>
 
   <div id="indicator">&#10003;</div>
 
