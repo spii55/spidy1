@@ -263,8 +263,8 @@ polarplot(t,Et,'k','LineWidth',2);
 title('Pattern Multiplication');
 
 
-%% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY
-N=10; d=0.25; k=2*pi;
+%% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY (BIDIRECTIONAL)
+N=10; d=0.5; k=2*pi;
 beta=-(k*d + pi/N);
 theta=linspace(0,2*pi,1000);
 
@@ -275,7 +275,7 @@ AF=AF/max(AF);
 
 figure(6);
 polarplot(theta,AF,'LineWidth',1.5);
-title('Hansen-Woodyard End-Fire Array Pattern');
+title('Bidirectional Hansen-Woodyard End-Fire Array Pattern');
 `;
     const dspSignalsCode = `% Exp 1: Generation of Continuous-Time and Discrete-Time Signals
 clc; clear; close all;
