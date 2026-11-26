@@ -264,13 +264,21 @@ title('Pattern Multiplication');
 
 
 %% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY (BIDIRECTIONAL)
-N=10; d=0.5; k=2*pi;
-beta=-(k*d + pi/N);
+N=10; d=0.25; k=2*pi;
+beta1=-(k*d + pi/N);
+beta2=+(k*d + pi/N);
 theta=linspace(0,2*pi,1000);
 
-psi=k*d*cos(theta)+beta;
-AF=abs(sin(N*psi/2)./(N*sin(psi/2)));
-AF(~isfinite(AF))=1;
+psi1=k*d*cos(theta)+beta1;
+psi2=k*d*cos(theta)+beta2;
+
+AF1=abs(sin(N*psi1/2)./(N*sin(psi1/2)));
+AF1(~isfinite(AF1))=1;
+
+AF2=abs(sin(N*psi2/2)./(N*sin(psi2/2)));
+AF2(~isfinite(AF2))=1;
+
+AF=AF1+AF2;
 AF=AF/max(AF);
 
 figure(6);
