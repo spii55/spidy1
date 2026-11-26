@@ -94,3 +94,18 @@ title('Array Factor');
 subplot(1,3,3);
 polarplot(t,Et,'k','LineWidth',2);
 title('Pattern Multiplication');
+
+
+%% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY
+N=10; d=0.25; k=2*pi;
+beta=-(k*d + pi/N);
+theta=linspace(0,2*pi,1000);
+
+psi=k*d*cos(theta)+beta;
+AF=abs(sin(N*psi/2)./(N*sin(psi/2)));
+AF(~isfinite(AF))=1;
+AF=AF/max(AF);
+
+figure(6);
+polarplot(theta,AF,'LineWidth',1.5);
+title('Hansen-Woodyard End-Fire Array Pattern');
