@@ -97,23 +97,30 @@ title('Pattern Multiplication');
 
 
 %% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY (BIDIRECTIONAL)
-N=10; d=0.25; k=2*pi;
-beta1=-(k*d + pi/N);
-beta2=+(k*d + pi/N);
-theta=linspace(0,2*pi,1000);
+N = 10;
+lambda = 1;
+d = lambda/4;
+k = 2*pi/lambda;
+L = (N-1)*d;
 
-psi1=k*d*cos(theta)+beta1;
-psi2=k*d*cos(theta)+beta2;
+theta = 0:0.1:360;
+theta_rad = deg2rad(theta);
 
-AF1=abs(sin(N*psi1/2)./(N*sin(psi1/2)));
-AF1(~isfinite(AF1))=1;
+% Case beta = +(kd + pi/N)
+beta1 = k*d + pi/N;
+psi1 = k*d*cos(theta_rad) + beta1;
+AF1 = abs(sin(N*psi1/2)./(N*sin(psi1/2)));
+AF1(~isfinite(AF1)) = 1;
 
-AF2=abs(sin(N*psi2/2)./(N*sin(psi2/2)));
-AF2(~isfinite(AF2))=1;
-
-AF=AF1+AF2;
-AF=AF/max(AF);
+% Case beta = -(kd + pi/N)
+beta2 = -(k*d + pi/N);
+psi2 = k*d*cos(theta_rad) + beta2;
+AF2 = abs(sin(N*psi2/2)./(N*sin(psi2/2)));
+AF2(~isfinite(AF2)) = 1;
 
 figure(6);
-polarplot(theta,AF,'LineWidth',1.5);
-title('Bidirectional Hansen-Woodyard End-Fire Array Pattern');
+polarplot(theta_rad, AF1, 'g-');
+hold on;
+polarplot(theta_rad, AF2, 'r');
+legend('\beta = +(kd + \pi/N)', '\beta = -(kd + \pi/N)');
+title('Hansen-Woodyard Endfire Array Rad Pattern');
