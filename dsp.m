@@ -1,123 +1,223 @@
 clc; clear; close all;
 
-%% EXPERIMENT 1: FRIIS TRANSMISSION EQUATION (GAIN FORM)
-Pt=100; Gt=25; Gr=20; f=3e9; c=3e8;
-R=1:0.1:50; L=c/f;
+%% 1. Simulate Friis Transmission (Aperture Form)
+Pt = 15;
+Aet = 0.2;  % value in m^2
+Aer = 0.5;  % value in m^2
+f = 5e9;
+d = 15000;
+c = 3e8;
+lambda = c/f;
 
-Pr=Pt*10^(Gt/10)*10^(Gr/10).*(L./(4*pi*R)).^2;
-P=Pr(end); dBm=10*log10(P*1000);
+Pr = Pt*(Aet*Aer)/(lambda^2*d^2); % calculating power received
+disp('Power received')
+disp(Pr)
 
-fprintf('=== EXPERIMENT 1 ===\n');
-fprintf('Received Power = %.6f W\n',P);
-fprintf('Received Power = %.4f dBm\n\n',dBm);
+distance = 0:100:15000;
+% received power at different distances
+Pr_distance = Pt*(Aet*Aer)./(lambda^2*distance.^2);
 
 figure(1);
-plot(R,10*log10(Pr*1000),'b','LineWidth',2);
-grid on; xlabel('Distance (m)');
-ylabel('Received Power (dBm)');
-title('Friis Transmission Equation (Gain Form)');
+plot(distance,Pr_distance, 'r')
+xlabel('Distance(m)')
+ylabel('Received power(W)')
+title('Distance vs Received Power')
+grid on
 
 
-%% EXPERIMENT 2: FRIIS TRANSMISSION EQUATION (APERTURE FORM)
-Pt=15; Aet=0.2; Aer=0.5;
-f=5e9; c=3e8; L=c/f;
-R=1:0.1:15;
+%% 2. Simulate Friis Transmission (Gain Form)
+Pt = 100;
+Gt_dB = 25;
+Gr_dB = 20;
+f = 3e9;
+d = 50;
+c = 3e8;
 
-Pr=Pt*Aet*Aer./(L^2*(R*1000).^2);
-P=Pr(end); dBm=10*log10(P*1000);
-
-fprintf('=== EXPERIMENT 2 ===\n');
-fprintf('Received Power at 15 km = %.4f microW\n',P*1e6);
-fprintf('Received Power at 15 km = %.4f dBm\n\n',dBm);
-
+% convert gain from dB to linear
+Gt = 10^(Gt_dB/10);
+Gr = 10^(Gr_dB/10);
+% Wavelength
+lambda = c/f;
+% Received power
+Pr = Pt*Gt*Gr*(lambda/(4*pi*d))^2;
+% calculating power received
+disp('Received Power =')
+disp(Pr)
+% Distance vs Received power
+distance = 0:1:50;
+Pr = Pt*Gt*Gr*(lambda./(4*pi*distance)).^2;
 figure(2);
-plot(R,10*log10(Pr*1000),'r','LineWidth',2);
-grid on; xlabel('Distance (km)');
-ylabel('Received Power (dBm)');
-title('Friis Transmission Equation (Aperture Form)');
+plot(distance,Pr,'r')
+xlabel('Distance(m)')
+ylabel('Received Power(W)')
+title('Distance vs Received Power')
+ylim([0 100])
+grid on
 
 
-%% EXPERIMENT 3: BROADSIDE ANTENNA ARRAY
-N=10; d=0.25; beta=0;
-theta=linspace(0,2*pi,1000);
-
-psi=2*pi*d*cos(theta)+beta;
-AF=abs(sin(N*psi/2)./(N*sin(psi/2)));
-
-AF(~isfinite(AF))=1;
-
-figure(3);
-polarplot(theta,AF,'LineWidth',1.5);
-title('Polar Radiation Pattern (Broadside Array)');
-
-
-%% EXPERIMENT 4: END-FIRE ANTENNA ARRAY
-N=4; d=0.5; k=2*pi;
-beta=-k*d;
-theta=linspace(0,2*pi,1000);
-
-psi=k*d*cos(theta)+beta;
-AF=abs(sin(N*psi/2)./(N*sin(psi/2)));
-
-AF(~isfinite(AF))=1;
-
-figure(4);
-polarplot(theta,AF,'LineWidth',1.5);
-title('Both-Side End-Fire Array Pattern');
-
-
-%% EXPERIMENT 5: PATTERN MULTIPLICATION (DIPOLE + ARRAY FACTOR)
-theta = 0:0.1:360;
-theta_rad = deg2rad(theta);
-
+%% 3. Pattern Multiplication (Isotropic Sources)
 lambda = 1;
 d = lambda/4;
-k = 2*pi/lambda;
-beta = 0;
+K = 2*pi/lambda;
+x = 0:0.01:2*pi;
+E_single = abs(cos(x));
+E_single = E_single/max(E_single);
 
-E = abs(sin(theta));
-AF = abs(2*cos((k*d*cos(theta)+beta)/2));
-ET = E.*AF;
+% Case 1 : beta = 0
+beta1 = 0;
+E_af1 = cos((K*d*cos(x)+ beta1)/2);
+E_total1 = E_single.*E_af1;
+E_af1 = E_af1/max(abs(E_af1));
+E_total1 = E_total1/max(abs(E_total1));
 
-figure(5);
-subplot(1,3,1);
-polarplot(theta,E,'b');
-title('Dipole pattern');
+% Case 2 : beta = pi/2
+beta2 = pi/2;
+E_af2 = cos((K*d*cos(x)+ beta2)/2);
+E_total2 = E_single.*E_af2;
+E_af2 = E_af2/max(abs(E_af2));
+E_total2 = E_total2/max(abs(E_total2));
 
-subplot(1,3,2);
-polarplot(theta,AF,'r');
-title('Array Factor');
+% Case 3 : beta = -pi/2
+beta3 = -pi/2;
+E_af3 = cos((K*d*cos(x)+ beta3)/2);
+E_total3 = E_single.*E_af3;
+E_af3 = E_af3/max(abs(E_af3));
+E_total3 = E_total3/max(abs(E_total3));
 
-subplot(1,3,3);
-polarplot(theta,ET);
-title('Pattern multiplication');
+% Plots
+figure(3);
+subplot(3,3,1);
+polarplot(x,E_single);
+grid on;
+title('Single source pattern');
+
+subplot(3,3,2);
+polarplot(x,E_af1);
+grid on;
+title('Array factor, \beta = 0');
+
+subplot(3,3,3);
+polarplot(x,E_total1);
+grid on;
+title('Total pattern, \beta = 0');
+
+subplot(3,3,4);
+polarplot(x,E_single);
+grid on;
+title('Single Source pattern');
+
+subplot(3,3,5);
+polarplot(x,E_af2);
+grid on;
+title("\beta=\pi/2: Array factor");
+
+subplot(3,3,6);
+polarplot(x,E_total2);
+grid on;
+title("\beta=\pi/2: Total Pattern");
+
+subplot(3,3,7);
+polarplot(x,E_single);
+grid on;
+title('Single Source pattern');
+
+subplot(3,3,8);
+polarplot(x,E_af3);
+grid on;
+title("\beta=-\pi/2: Array factor");
+
+subplot(3,3,9);
+polarplot(x,E_total3);
+grid on;
+title('Pattern multiplication for isotropic sources');
 
 
-%% EXPERIMENT 6: HANSEN-WOODYARD END-FIRE ARRAY (BIDIRECTIONAL)
+%% 4. Array Factor Pattern of 10-Element Broadside Array
 N = 10;
 lambda = 1;
-d = lambda/4;
 k = 2*pi/lambda;
+d = lambda/4;
+phi = 0:0.01:2*pi;
+alpha = 0;
+L = (N-1)*d;
+psi = k*d*cos(phi)+alpha;
+Earrayfactor = cos(psi/2);
+% Array factor
+AF = (1/N)*abs((sin(N*psi/2))./(sin(psi/2)));
+figure(4);
+polarplot(phi,AF);
+grid on;
+D = 2*L/lambda;
+Ddb = 10*log10(D);
+disp('Directivity of 10 elements broadside array');
+disp(Ddb);
+title('Array factor pattern of 10 element broadside array');
+
+
+%% 5. 10-Element Uniform Amplitude Hansen-Woodyard Array
+lambda = 1;
+d = lambda/4;
+N = 10;
+k = 2*pi/lambda;
+a = k*d + (2.94/N);
 L = (N-1)*d;
 
-theta = 0:0.1:360;
-theta_rad = deg2rad(theta);
+x = linspace(0,2*pi,360);
+psi = k*d*cos(x) + a;
+Arrayfactor = cos(psi/2);
+AF = (1/N)*abs((sin(N*psi/2))./(sin(psi/2)));
+figure(5);
+polarplot(x,abs(AF),'g-');
+hold on;
 
-% Case beta = +(kd + pi/N)
-beta1 = k*d + pi/N;
-psi1 = k*d*cos(theta_rad) + beta1;
-AF1 = abs(sin(N*psi1/2)./(N*sin(psi1/2)));
-AF1(~isfinite(AF1)) = 1;
+a = (-1)*(k*d + 2.94/N);
+x = linspace(0,2*pi,360);
+psi = k*d*cos(x) + a;
+Arrayfactor = cos(psi/2);
+AF = (1/N)*abs((sin(N*psi/2))./(sin(psi/2)));
+polarplot(x,abs(AF),'r');
+legend('For k*d+(2.94/N)','For -(k*d+(2.94/N))');
 
-% Case beta = -(kd + pi/N)
-beta2 = -(k*d + pi/N);
-psi2 = k*d*cos(theta_rad) + beta2;
-AF2 = abs(sin(N*psi2/2)./(N*sin(psi2/2)));
-AF2(~isfinite(AF2)) = 1;
+D = 1.789*(4*(L/lambda));
+Ddb = 10*log10(D);
+disp('Directivity of 10 element HansenWoodyard array is');
+disp(D);
+disp('Directivity of 10 element HansenWoodyard array in dB is');
+disp(Ddb);
+title('HansenWoodyard Array');
+hold off;
+
+
+%% 6. 10-Element Uniform Amplitude Endfire Array (d = lambda/4)
+alpha = 0;
+N = 10;
+lambda = 1;
+k = 2*pi/lambda;
+d = lambda/4;
+phi = 0:0.01:2*pi;
+L = (N-1)*d;
+
+% Case 1: End-fire array (+kd)
+psi1 = k*d*cos(phi) + k*d;
+AF1 = (1/N)*abs(sin(N*psi1/2)./sin(psi1/2));
+
+% Case 2: End-fire array (-kd)
+psi2 = k*d*cos(phi) - k*d;
+AF2 = (1/N)*abs(sin(N*psi2/2)./sin(psi2/2));
 
 figure(6);
-polarplot(theta_rad, AF1, 'g-');
+polarplot(phi, AF1, '-');
 hold on;
-polarplot(theta_rad, AF2, 'r');
-legend('\beta = +(kd + \pi/N)', '\beta = -(kd + \pi/N)');
-title('Hansen-Woodyard Endfire Array Rad Pattern');
+polarplot(phi, AF2, ':');
+grid on;
+legend('+kd (Solid Line)', '-kd (Dotted Line)');
+title('Array Factor Pattern for 10 Element End-Fire Array');
+hold off;
+
+% Directivity approximation
+D = 2*L/lambda;
+Ddb = 10*log10(D);
+disp('Approximate Directivity of 10 element array');
+disp(D);
+disp('Approximate Directivity in dB:');
+disp(Ddb);
